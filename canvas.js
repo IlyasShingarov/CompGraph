@@ -1,6 +1,21 @@
 const canvas = document.querySelector("#canvas");
 const ctx = canvas.getContext("2d");
 
+/*TODO
+* Сделать класс точки
+* Сделать анимацию разрастания кругов
+* Сделать детекцию коллизии
+*
+*
+* Реализовать панорамирование
+* Зум (Частично реализован)
+*
+* Поворот идёт нахуй до второй лабы
+*
+* Сделать интерфейс
+*
+* */
+
 /*class Dot {
     constructor(x, y) {
         this.x = x;
@@ -18,6 +33,7 @@ class Engine {
         this.center = center;
         this.unitSize = unitSize;
         this.dotArr = [];
+        this.stdR = 3;
     }
 
     getReal(dot) {
@@ -41,13 +57,29 @@ class Engine {
 
     addDot(dot) {
         let dotVector = this.getRelative(dot)
-        this.dotArr.push({x: dotVector[0], y: dotVector[1]});
+        this.dotArr.push({x: dotVector[0], y: dotVector[1], r: this.stdR});
         console.log(this.dotArr)
 
         ctx.beginPath();
-        ctx.arc(dot.x, dot.y, 3, 0, 2 * Math.PI, true);
+        ctx.arc(dot.x, dot.y, dot.r, 0, 2 * Math.PI, true);
         ctx.fill();
     }
+
+    // grow() {
+    //     // Make new array
+    //     // Grow little
+    //         // Code
+    //     // Check collision
+    //         // Code
+    //         // If collided
+    //             // Remove dot from array
+    //     let growArr = Array.from(this.dotArr);
+    //     growArr.forEach((dot) => {
+    //         ctx.beginPath();
+    //         ctx.arc(dot.x, dot.y, dot.r++, 0, 2 * Math.PI, true);
+    //         ctx.fill();
+    //     })
+    // }
 
     drawCenterCross() {
         ctx.beginPath()
@@ -85,14 +117,13 @@ class Engine {
     render() {
         this.drawGrid();
         this.dotArr.forEach((dot) => {
-            let vect = this.getReal(dot)
+            let vector = this.getReal(dot)
             ctx.beginPath();
-            ctx.arc(vect[0], vect[1], 3, 0, 2 * Math.PI, true);
+            ctx.arc(vector[0], vector[1], this.stdR, 0, 2 * Math.PI, true);
             ctx.fill();
         });
     }
 }
-
 
 // function test(engine) {
 //     engine.drawGrid()
@@ -125,7 +156,7 @@ class Layer {
             this.engine.render()
         })
         canvas.addEventListener('mousedown', (e) => {
-            this.engine.addDot({x: e.clientX, y: e.clientY})
+            this.engine.addDot({x: e.clientX, y: e.clientY, r: this.engine.stdR})
             // this.engine.render()
         })
         this.engine.render()
