@@ -27,7 +27,7 @@ class Engine {
     getRelative(dot) {
         let x = (dot.x - this.center.x) / this.unitSize;
         let y = -(dot.y - this.center.y) / this.unitSize;
-        return [x.toFixed(3), y.toFixed(3)]
+        return [+x.toFixed(3), +y.toFixed(3)]
     }
 
     drawDot(dot){
@@ -83,6 +83,7 @@ class Engine {
     }
 
     render() {
+        this.drawGrid();
         this.dotArr.forEach((dot) => {
             let vect = this.getReal(dot)
             ctx.beginPath();
@@ -93,16 +94,16 @@ class Engine {
 }
 
 
-function test(engine) {
-    engine.drawGrid()
-    engine.drawDot({x: 1, y: 1})
-    engine.drawDot({x: 5, y: 3})
-    engine.drawDot({x: 3, y: 2})
-    engine.drawDot({x: 6, y: 7})
-    engine.drawDot({x: 5, y: -3})
-    engine.drawDot({x: -3, y: 2})
-    engine.drawDot({x: -6, y: -7})
-}
+// function test(engine) {
+//     engine.drawGrid()
+//     engine.drawDot({x: 1, y: 1})
+//     engine.drawDot({x: 5, y: 3})
+//     engine.drawDot({x: 3, y: 2})
+//     engine.drawDot({x: 6, y: 7})
+//     engine.drawDot({x: 5, y: -3})
+//     engine.drawDot({x: -3, y: 2})
+//     engine.drawDot({x: -6, y: -7})
+// }
 
 class App {
     constructor(container) {
@@ -117,18 +118,17 @@ class Layer {
 
         this.fit(this.canvas);
         this.engine = new Engine({x: this.canvas.width / 2, y: this.canvas.height / 2 }, 30)
-        test(this.engine)
-        canvas.addEventListener('mousedown', (e) => {
-            let rect = canvas.getBoundingClientRect();
-            this.engine.addDot({x: e.clientX, y: e.clientY})
-            this.engine.render()
-        })
+
         addEventListener(`resize`, () => {
             this.fit(this.canvas);
-            this.engine = new Engine({x: this.canvas.width / 2, y: this.canvas.height / 2}, 30)
-            test(this.engine)
+            this.engine.center = {x: this.canvas.width / 2, y: this.canvas.height / 2}
             this.engine.render()
         })
+        canvas.addEventListener('mousedown', (e) => {
+            this.engine.addDot({x: e.clientX, y: e.clientY})
+            // this.engine.render()
+        })
+        this.engine.render()
     }
 
     fit(cnv) {
@@ -141,23 +141,3 @@ class Layer {
 onload = () => {
     new App(document.querySelector(`body`));
 }
-
-/*window.addEventListener('load', () => {
-
-    canvas.height = window.innerHeight - 20;
-    canvas.width = window.innerWidth - 20;
-    let engine = new Engine({x: canvas.width / 2, y: canvas.height / 2}, 30)
-
-    test(engine)
-})
-
-
-addEventListener('resize', () => {
-    canvas.height = window.innerHeight - 20;
-    canvas.width = window.innerWidth - 20;
-
-    let engine = new Engine({x: canvas.width / 2, y: canvas.height / 2}, 30)
-
-    test(engine)
-
-})*/
