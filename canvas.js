@@ -27,6 +27,7 @@ class Dot {
         this.y = y;
         this.radius = 0;
         this.type = "relative";
+        this.grown = false;
     }
 
     static distance(a, b) {
@@ -61,9 +62,6 @@ class Engine {
         console.log(this.dotArr); // Debug
 
         this.drawDot(dot);
-        // this.ctx.beginPath();
-        // this.ctx.arc(dot.x, dot.y, this.stdR, 0, 2 * Math.PI, true);
-        // this.ctx.fill();
     }
 
     drawDot(dot) {
@@ -72,8 +70,16 @@ class Engine {
         this.ctx.fill();
     }
 
+    drawCircle(dot) {
+        this.ctx.beginPath();
+        this.ctx.arc(dot.x, dot.y, dot.radius * this.unitSize, 0, 2 * Math.PI, true);
+        this.ctx.strokeStyle = "black";
+        this.ctx.stroke();
+    }
+
     getReal(dot) {
         let newDot = new Dot(this.center.x + dot.x * this.unitSize, this.center.y - dot.y * this.unitSize);
+        newDot.radius = dot.radius;
         newDot.x = +newDot.x.toFixed(2);
         newDot.y = +newDot.y.toFixed(2);
         newDot.type = "real";
@@ -97,29 +103,30 @@ class Engine {
         let realDot = this.getReal(dot);
 
         this.drawDot(realDot);
-/*        this.ctx.beginPath();
-        this.ctx.arc(realDot.x, realDot.y, 3, 0, 2 * Math.PI, true);
-        this.ctx.fill();*/
     }
 
-    // grow() {
-    //     // Make new array
-    //     // Grow little
-    //         // Code
-    //     // Check collision
-    //         // Code
-    //         // If collided
-    //             // Remove dot from array
-    //     let growArr = Array.from(this.dotArr);
-    //     growArr.forEach((dot) => {
-    //         ctx.beginPath();
-    //         ctx.arc(dot.x, dot.y, dot.r++, 0, 2 * Math.PI, true);
-    //         ctx.fill();
-    //     })
-    // }
+    grow() {
+        let workArr = this.dotArr;
+
+        console.log(workArr);
+        for (let i = 0; i < workArr.length - 1; i++) {
+            for (let j = i + 1; j < workArr.length; j++) {
+                if (Dot.checkCollision(workArr[i], workArr[j])) {
+                    workArr[i].grown = true;
+                    workArr[j].grown = true;
+                }
+            }
+        }
+        workArr.forEach((dot) => {
+            if (!dot.grown) {
+                dot.radius += 1/this.unitSize;
+                this.drawCircle(this.getReal(dot));
+            }
+        });
+    }
 
     drawCenterCross() {
-        this.ctx.beginPath()
+        this.ctx.beginPath();
 
         this.ctx.moveTo(this.center.x, 0);
         this.ctx.lineTo(this.center.x, this.canvas.height);
@@ -147,18 +154,22 @@ class Engine {
         }
         this.ctx.strokeStyle = "grey";
         this.ctx.stroke();
-
-        this.drawCenterCross(this.center)
     }
 
-    render() {
-        this.drawGrid();
+    renderDots() {
         this.dotArr.forEach((dot) => {
             let realDot = this.getReal(dot)
             this.ctx.beginPath();
             this.ctx.arc(realDot.x, realDot.y, this.stdR, 0, 2 * Math.PI, true);
             this.ctx.fill();
         });
+    }
+
+    renderAll() {
+        // this.putDot({x: 0, y: 0});
+        this.drawCenterCross(this.center);
+        this.drawGrid();
+        this.renderDots();
     }
 }
 
@@ -180,17 +191,23 @@ class Layer {
         addEventListener(`resize`, () => {
             this.fit(this.canvas);
             this.engine.center = {x: this.canvas.width / 2, y: this.canvas.height / 2}
-            this.engine.render()
+            this.engine.renderAll()
         })
 
         // Штука, которая рисует точку при нажатии на холст
-        this.canvas.addEventListener('mousedown', (e) => {
+        this.canvas.addEventListener('mousedown', (event) => {
             let rect = this.canvas.getBoundingClientRect()
-            this.engine.addDot({x: e.clientX - rect.left, y: e.clientY - rect.top, r: this.engine.stdR})
+            this.engine.addDot({x: event.clientX - rect.left, y: event.clientY - rect.top, r: this.engine.stdR});
+        })
+
+        document.addEventListener(`keydown`, (event) => {
+            if (event.code == 'Space') {
+                this.engine.grow();
+            }
         })
 
         // Метод движка, который вызывает отрисовку заранее поставленных точек
-        this.engine.render()
+        this.engine.renderAll()
     }
 
     // Метод, который изменяет размер канваса
