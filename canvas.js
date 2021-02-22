@@ -24,6 +24,7 @@
 *       Редактирование точки
 *       Удаление точки
 *       Очистка радиусов, кругов и флагов роста
+*       Отмена последнего действия <Ctrl + Z>
 *
 *
 *
@@ -31,8 +32,8 @@
 * Сделать детекцию коллизии -- DONE
 *
 *
-* Реализовать панорамирование
-* Зум (Частично реализован)
+* Реализовать панорамирование <Ну наверн стрелочки>
+* Зум (Частично реализован) -- DONE <Ctrl + [> <Ctrl + ]>
 *
 * Поворот идёт нахуй до второй лабы
 *
@@ -130,7 +131,7 @@ class Engine {
 
         workArr.forEach((dot) => {
             if (!dot.grown) {
-                dot.radius += +(1/this.unitSize).toFixed(2);
+                dot.radius += 1/this.unitSize;
                 // this.drawCircle(this.getReal(dot));
             }
         });
@@ -197,8 +198,8 @@ class Engine {
     }
 
     renderAll() {
-        // this.putDot({x: 0, y: 0});
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.drawDot(this.center);
         this.drawCenterCross(this.center);
         this.drawGrid();
         this.renderDots();
@@ -234,18 +235,19 @@ class Layer {
         })
 
         document.addEventListener(`keydown`, (event) => {
-            if (event.code == 'Space') {
+            if (event.code === 'Space') {
                 this.engine.grow();
                 this.engine.renderAll();
             }
-            if (event.code == 'BracketLeft' && (event.ctrlKey || event.metaKey)) {
-                this.engine.unitSize > 0 ? this.engine.unitSize -= 10 : alert("Достигнуто минимальное приближение");
+            if (event.code === 'BracketLeft' && (event.ctrlKey || event.metaKey)) {
+                this.engine.unitSize > 10 ? this.engine.unitSize -= 10 : alert("Достигнуто минимальное приближение");
             }
-            if (event.code == 'BracketRight' && (event.ctrlKey || event.metaKey)) {
-                this.engine.unitSize < 100 ? this.engine.unitSize += 10 : alert("Достигнуто максимальное приближение");
+            if (event.code === 'BracketRight' && (event.ctrlKey || event.metaKey)) {
+                this.engine.unitSize < 500 ? this.engine.unitSize += 10 : alert("Достигнуто максимальное приближение");
+                console.log(this.engine.unitSize);
                 // this.engine.unitSize += 10;
             }
-            this.engine.renderAll()
+            this.engine.renderAll();
         })
 
         // Метод движка, который вызывает отрисовку заранее поставленных точек
