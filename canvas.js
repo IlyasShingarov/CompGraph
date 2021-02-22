@@ -4,6 +4,9 @@
 *   Методы:
 *       Поиск расстояния между двумя точками
 *       Проверка окружностей на столкновение
+*       Вернуть координаты относительно канваса
+*
+*
 * Сделать анимацию разрастания кругов
 * Сделать детекцию коллизии
 *
@@ -18,10 +21,12 @@
 * */
 
 class Dot {
+
     constructor(x, y) {
         this.x = x;
         this.y = y;
         this.radius = 0;
+        this.type = "relative";
     }
 
     static distance(a, b) {
@@ -47,50 +52,54 @@ class Engine {
         this.stdR = 3;
     }
 
+    // Assumed implemented
     addDot(dot) {
-        let dotVector = this.getRelative(dot)
-        let relDot = new Dot();
-        this.dotArr.push();
+        let rel = this.getRelative(dot)
+        let relDot = new Dot(rel.x, rel.y);
+        this.dotArr.push(relDot);
 
+        console.log(this.dotArr); // Debug
+
+        this.drawDot(dot);
+        // this.ctx.beginPath();
+        // this.ctx.arc(dot.x, dot.y, this.stdR, 0, 2 * Math.PI, true);
+        // this.ctx.fill();
+    }
+
+    drawDot(dot) {
         this.ctx.beginPath();
         this.ctx.arc(dot.x, dot.y, this.stdR, 0, 2 * Math.PI, true);
         this.ctx.fill();
     }
 
-
-
-
-
-
-
-
     getReal(dot) {
-        return [this.center.x + dot.x * this.unitSize, this.center.y - dot.y * this.unitSize]
+        let newDot = new Dot(this.center.x + dot.x * this.unitSize, this.center.y - dot.y * this.unitSize);
+        newDot.x = +newDot.x.toFixed(2);
+        newDot.y = +newDot.y.toFixed(2);
+        newDot.type = "real";
+        return newDot;
     }
 
     getRelative(dot) {
         let x = (dot.x - this.center.x) / this.unitSize;
         let y = -(dot.y - this.center.y) / this.unitSize;
-        return [+x.toFixed(3), +y.toFixed(3)]
+
+        let newDot = new Dot(+x.toFixed(2), +y.toFixed(2));
+        newDot.type = "relative";
+
+        return newDot;
     }
 
-    drawDot(dot){
-        let dotVector = this.getReal(dot);
-        this.dotArr.push(dot);
+    putDot(dot){
+        let relDot = new Dot(dot.x, dot.y);
+        this.dotArr.push(relDot);
 
-        this.ctx.beginPath();
-        this.ctx.arc(dotVector[0], dotVector[1], 3, 0, 2 * Math.PI, true);
-        this.ctx.fill();
-    }
+        let realDot = this.getReal(dot);
 
-    addDot(dot) {
-        let dotVector = this.getRelative(dot)
-        this.dotArr.push({x: dotVector[0], y: dotVector[1], r: this.stdR});
-        console.log(this.dotArr)
-
-        this.ctx.beginPath();
-        this.ctx.arc(dot.x, dot.y, dot.r, 0, 2 * Math.PI, true);
-        this.ctx.fill();
+        this.drawDot(realDot);
+/*        this.ctx.beginPath();
+        this.ctx.arc(realDot.x, realDot.y, 3, 0, 2 * Math.PI, true);
+        this.ctx.fill();*/
     }
 
     // grow() {
@@ -145,9 +154,9 @@ class Engine {
     render() {
         this.drawGrid();
         this.dotArr.forEach((dot) => {
-            let vector = this.getReal(dot)
+            let realDot = this.getReal(dot)
             this.ctx.beginPath();
-            this.ctx.arc(vector[0], vector[1], this.stdR, 0, 2 * Math.PI, true);
+            this.ctx.arc(realDot.x, realDot.y, this.stdR, 0, 2 * Math.PI, true);
             this.ctx.fill();
         });
     }
@@ -159,6 +168,7 @@ class App {
     }
 }
 
+// Сюда все слушалки и рисовалки
 class Layer {
     constructor(container) {
         this.canvas = document.querySelector(`#canvas`);
