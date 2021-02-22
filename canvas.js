@@ -25,6 +25,7 @@
 *       Удаление точки
 *       Очистка радиусов, кругов и флагов роста
 *       Отмена последнего действия <Ctrl + Z>
+        Проверка на ввод чего-либо
 *
 *
 *
@@ -74,39 +75,20 @@ class Engine {
         this.stdR = 3;
     }
 
-    // Assumed implemented
+    // Добавление точки по абсолютным координатам
     addDot(dot) {
         let rel = this.getRelative(dot)
         let relDot = new Dot(rel.x, rel.y);
         this.dotArr.push(relDot);
-
-        console.log(this.dotArr); // Debug
-
-        this.drawDot(dot);
     }
 
-    drawDot(dot) {
-        this.ctx.beginPath();
-        this.ctx.arc(dot.x, dot.y, this.stdR, 0, 2 * Math.PI, true);
-        this.ctx.fill();
+    // Добавить точку по относительным координатам
+    putDot(dot){
+        let relDot = new Dot(dot.x, dot.y);
+        this.dotArr.push(relDot);
     }
 
-    drawCircle(dot) {
-        this.ctx.beginPath();
-        this.ctx.arc(dot.x, dot.y, dot.radius * this.unitSize, 0, 2 * Math.PI, true);
-        this.ctx.strokeStyle = "black";
-        this.ctx.stroke();
-    }
-
-    getReal(dot) {
-        let newDot = new Dot(this.center.x + dot.x * this.unitSize, this.center.y - dot.y * this.unitSize);
-        newDot.radius = dot.radius;
-        newDot.x = +newDot.x.toFixed(2);
-        newDot.y = +newDot.y.toFixed(2);
-        newDot.type = "real";
-        return newDot;
-    }
-
+    // Получить относительные координаты из абсолютных
     getRelative(dot) {
         let x = (dot.x - this.center.x) / this.unitSize;
         let y = -(dot.y - this.center.y) / this.unitSize;
@@ -117,25 +99,26 @@ class Engine {
         return newDot;
     }
 
-    putDot(dot){
-        let relDot = new Dot(dot.x, dot.y);
-        this.dotArr.push(relDot);
-
-        let realDot = this.getReal(dot);
-
-        this.drawDot(realDot);
+    // Получить абсолютные координаты из относительных
+    getReal(dot) {
+        let newDot = new Dot(this.center.x + dot.x * this.unitSize, this.center.y - dot.y * this.unitSize);
+        newDot.radius = dot.radius;
+        newDot.x = +newDot.x.toFixed(2);
+        newDot.y = +newDot.y.toFixed(2);
+        newDot.type = "real";
+        return newDot;
     }
 
+    // Функция, запускающая рост кругов
     grow() {
         let workArr = this.dotArr;
 
         workArr.forEach((dot) => {
             if (!dot.grown) {
                 dot.radius += 1/this.unitSize;
-                // this.drawCircle(this.getReal(dot));
             }
         });
-        console.log(workArr);
+        // console.log(workArr);
         for (let i = 0; i < workArr.length - 1; i++) {
             for (let j = i + 1; j < workArr.length; j++) {
                 if (Dot.checkCollision(workArr[i], workArr[j])) {
@@ -146,6 +129,22 @@ class Engine {
         }
     }
 
+    // Рисовать точку
+    drawDot(dot) {
+        this.ctx.beginPath();
+        this.ctx.arc(dot.x, dot.y, this.stdR, 0, 2 * Math.PI, true);
+        this.ctx.fill();
+    }
+
+    // Рисовать круг
+    drawCircle(dot) {
+        this.ctx.beginPath();
+        this.ctx.arc(dot.x, dot.y, dot.radius * this.unitSize, 0, 2 * Math.PI, true);
+        this.ctx.strokeStyle = "black";
+        this.ctx.stroke();
+    }
+
+    //Функция отрисовывает оси координат
     drawCenterCross() {
         this.ctx.beginPath();
 
@@ -159,6 +158,7 @@ class Engine {
         this.ctx.stroke();
     }
 
+    // Функция отрисоываывает координатную сетку
     drawGrid() {
         this.ctx.beginPath()
         for (let i = this.unitSize; i < this.canvas.width; i += this.unitSize) {
@@ -177,6 +177,17 @@ class Engine {
         this.ctx.stroke();
     }
 
+    // Функция для увеличения масштаба
+    scaleUp(factor) {
+        this.unitSize < 500 ? this.unitSize += factor : alert("Достигнуто максимальное приближение");
+    }
+
+    // Функция для уменьшения масштаба
+    scaleDown(factor) {
+        this.unitSize > 10 ? this.unitSize -= factor : alert("Достигнуто минимальное приближение");
+    }
+
+    // Функция отрисовывает все точки, котоорые есть в списке
     renderDots() {
         this.dotArr.forEach((dot) => {
             let realDot = this.getReal(dot)
@@ -186,6 +197,7 @@ class Engine {
         });
     }
 
+    // Функция отрисовывает соответствующей точке круг
     renderCircles() {
         this.dotArr.forEach((circle) => {
             let realCircle = this.getReal(circle)
@@ -197,6 +209,7 @@ class Engine {
         })
     }
 
+    // Общая функция отрисовки
     renderAll() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawDot(this.center);
@@ -232,21 +245,20 @@ class Layer {
         this.canvas.addEventListener('mousedown', (event) => {
             let rect = this.canvas.getBoundingClientRect()
             this.engine.addDot({x: event.clientX - rect.left, y: event.clientY - rect.top, r: this.engine.stdR});
+            this.engine.renderAll();
         })
 
         document.addEventListener(`keydown`, (event) => {
             if (event.code === 'Space') {
                 this.engine.grow();
-                this.engine.renderAll();
             }
             if (event.code === 'BracketLeft' && (event.ctrlKey || event.metaKey)) {
-                this.engine.unitSize > 10 ? this.engine.unitSize -= 10 : alert("Достигнуто минимальное приближение");
+                this.engine.scaleDown(10);
             }
             if (event.code === 'BracketRight' && (event.ctrlKey || event.metaKey)) {
-                this.engine.unitSize < 500 ? this.engine.unitSize += 10 : alert("Достигнуто максимальное приближение");
-                console.log(this.engine.unitSize);
-                // this.engine.unitSize += 10;
+                this.engine.scaleUp(10);
             }
+
             this.engine.renderAll();
         })
 
