@@ -1,14 +1,34 @@
 /*TODO
-* Сделать класс точки
-*   Поля: Координаты + радиус круга (изначально 0)
+* Сделать класс точки -- DONE
+*   Поля: Координаты + радиус круга (изначально 0) + флаг роста + тип координат точки -- DONE
 *   Методы:
-*       Поиск расстояния между двумя точками
-*       Проверка окружностей на столкновение
-*       Вернуть координаты относительно канваса
+*       Поиск расстояния между двумя точками -- DONE
+*       Проверка окружностей на столкновение -- DONE
+*
+* Движок:
+*       Вернуть координаты относительно канваса -- DONE
+*       Рассчитать относительные координаты -- DONE
+*
+*
+*       Отрисовка точки -- DONE
+*       Отрисовка круга -- DONE
+*       Прорисовка фигур из списка -- DONE
+*
+*       Добавить перерасчёт радиуса в абсолютные координаты
+*       (Походу оно не нужно~)
+*
+*
+* Интерфейс:
+*       Добавление точки мышью -- DONE
+*       Добавление точки через интерфейс
+*       Редактирование точки
+*       Удаление точки
+*       Очистка радиусов, кругов и флагов роста
+*
 *
 *
 * Сделать анимацию разрастания кругов
-* Сделать детекцию коллизии
+* Сделать детекцию коллизии -- DONE
 *
 *
 * Реализовать панорамирование
@@ -108,6 +128,12 @@ class Engine {
     grow() {
         let workArr = this.dotArr;
 
+        workArr.forEach((dot) => {
+            if (!dot.grown) {
+                dot.radius += +(1/this.unitSize).toFixed(2);
+                // this.drawCircle(this.getReal(dot));
+            }
+        });
         console.log(workArr);
         for (let i = 0; i < workArr.length - 1; i++) {
             for (let j = i + 1; j < workArr.length; j++) {
@@ -117,12 +143,6 @@ class Engine {
                 }
             }
         }
-        workArr.forEach((dot) => {
-            if (!dot.grown) {
-                dot.radius += 1/this.unitSize;
-                this.drawCircle(this.getReal(dot));
-            }
-        });
     }
 
     drawCenterCross() {
@@ -165,11 +185,24 @@ class Engine {
         });
     }
 
+    renderCircles() {
+        this.dotArr.forEach((circle) => {
+            let realCircle = this.getReal(circle)
+            this.drawCircle(realCircle)
+/*            this.ctx.beginPath();
+            this.ctx.arc(realCircle.x, realCircle.y, realCircle.radius * this.unitSize, 0, 2 * Math.PI, true);
+            this.ctx.strokeStyle = "black";
+            this.ctx.stroke();*/
+        })
+    }
+
     renderAll() {
         // this.putDot({x: 0, y: 0});
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawCenterCross(this.center);
         this.drawGrid();
         this.renderDots();
+        this.renderCircles();
     }
 }
 
@@ -203,7 +236,16 @@ class Layer {
         document.addEventListener(`keydown`, (event) => {
             if (event.code == 'Space') {
                 this.engine.grow();
+                this.engine.renderAll();
             }
+            if (event.code == 'BracketLeft' && (event.ctrlKey || event.metaKey)) {
+                this.engine.unitSize > 0 ? this.engine.unitSize -= 10 : alert("Достигнуто минимальное приближение");
+            }
+            if (event.code == 'BracketRight' && (event.ctrlKey || event.metaKey)) {
+                this.engine.unitSize < 100 ? this.engine.unitSize += 10 : alert("Достигнуто максимальное приближение");
+                // this.engine.unitSize += 10;
+            }
+            this.engine.renderAll()
         })
 
         // Метод движка, который вызывает отрисовку заранее поставленных точек
