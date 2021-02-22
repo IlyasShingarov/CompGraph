@@ -156,7 +156,9 @@ class Layer {
             this.engine.render()
         })
         canvas.addEventListener('mousedown', (e) => {
-            this.engine.addDot({x: e.clientX, y: e.clientY, r: this.engine.stdR})
+            let rect = canvas.getBoundingClientRect()
+            console.log(rect.left)
+            this.engine.addDot({x: e.clientX - rect.left, y: e.clientY, r: this.engine.stdR})
             // this.engine.render()
         })
         this.engine.render()

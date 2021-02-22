@@ -1,5 +1,5 @@
 * {
-    margin: 0 !important;
+    margin: 0;
     padding: 0 !important;
     box-sizing: border-box;
 }
@@ -11,8 +11,15 @@ body {
     height: 100vh;
 }
 
+.interface {
+    width: 30%;
+    display: inline-block;
+    background: aliceblue;
+}
+
 #canvas {
-    display: block;
+    float: left;
+    display: inline-block;
     border: 2px solid black;
     width: 100%;
     height: 100%;
