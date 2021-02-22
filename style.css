@@ -1,27 +1,30 @@
-* {
-    margin: 0;
-    padding: 0 !important;
-    box-sizing: border-box;
-}
-
 body {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100vw;
     height: 100vh;
+    margin: 0;
 }
+.container {
+    display: flex;
+    justify-content: space-between;
+    height: 100%;
+    margin: 0;
+    padding: 0;
 
+}
+/* у тебя может быть переполненние твоего интерефейса, но это смотря что ты делать юудешь и как, если появится горизонтальнаяполоса прокрутки то пиши чо */
 .interface {
     width: 30%;
-    display: inline-block;
     background: aliceblue;
+    overflow: auto;
+}
+
+.canvas__container {
+    /* я просто отодвинул одно от другого */
+    margin-right: 0;
+    width: 70%;
+    border: 2px solid black;
+    background: rgba(0, 0, 0, 0);
 }
 
 #canvas {
-    float: left;
-    display: inline-block;
-    border: 2px solid black;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.0);
+
 }
