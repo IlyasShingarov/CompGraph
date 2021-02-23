@@ -66,10 +66,10 @@ class Dot {
 
 class Engine {
 
-    constructor(canvas, center, unitSize) {
+    constructor(canvas, unitSize) {
         this.canvas = canvas;
         this.ctx = this.canvas.getContext(`2d`);
-        this.center = center;
+        this.center = {x: this.canvas.width / 2, y: this.canvas.height / 2 };
         this.unitSize = unitSize;
         this.dotArr = [];
         this.stdR = 3;
@@ -161,13 +161,13 @@ class Engine {
     // Функция отрисоываывает координатную сетку
     drawGrid() {
         this.ctx.beginPath()
-        for (let i = this.unitSize; i < this.canvas.width; i += this.unitSize) {
+        for (let i = this.unitSize; i < this.canvas.width * 2; i += this.unitSize) {
             this.ctx.moveTo(this.center.x + i, 0);
             this.ctx.lineTo(this.center.x + i, this.canvas.height);
             this.ctx.moveTo(this.center.x - i, 0);
             this.ctx.lineTo(this.center.x - i, this.canvas.height);
         }
-        for (let i = this.unitSize; i < this.canvas.height; i += this.unitSize) {
+        for (let i = this.unitSize; i < this.canvas.height * 2; i += this.unitSize) {
             this.ctx.moveTo(0, this.center.y + i);
             this.ctx.lineTo(this.canvas.width, this.center.y + i);
             this.ctx.moveTo(0, this.center.y - i);
@@ -232,7 +232,7 @@ class Layer {
         this.canvas = document.querySelector(`#canvas`);
 
         this.fit(this.canvas);
-        this.engine = new Engine(this.canvas,{x: this.canvas.width / 2, y: this.canvas.height / 2 }, 30)
+        this.engine = new Engine(this.canvas, 30)
 
         // Штука, которая реагирует на смену размера окна
         addEventListener(`resize`, () => {
@@ -249,17 +249,36 @@ class Layer {
         })
 
         document.addEventListener(`keydown`, (event) => {
-            if (event.code === 'Space') {
-                this.engine.grow();
-            }
             if (event.code === 'BracketLeft' && (event.ctrlKey || event.metaKey)) {
                 this.engine.scaleDown(10);
             }
             if (event.code === 'BracketRight' && (event.ctrlKey || event.metaKey)) {
                 this.engine.scaleUp(10);
             }
-
+            if (event.code === 'ArrowLeft' && (event.ctrlKey || event.metaKey)) {
+                this.engine.center.x += 10;
+            }
+            if (event.code === 'ArrowRight' && (event.ctrlKey || event.metaKey)) {
+                this.engine.center.x -= 10;
+            }
+            if (event.code === 'ArrowUp' && (event.ctrlKey || event.metaKey)) {
+                this.engine.center.y += 10;
+            }
+            if (event.code === 'ArrowDown' && (event.ctrlKey || event.metaKey)) {
+                this.engine.center.y -= 10;
+            }
             this.engine.renderAll();
+        })
+
+        document.addEventListener(`keypress`, (event) => {
+            if (event.code === 'Space') {
+                let timer = setInterval(()=>{
+                    this.engine.grow();
+                    this.engine.renderAll();
+                    if (end) clearInterval(timer)
+                }, 1000 / 100)
+                // this.engine.grow();
+            }
         })
 
         // Метод движка, который вызывает отрисовку заранее поставленных точек
