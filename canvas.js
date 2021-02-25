@@ -20,7 +20,7 @@
 *
 * Интерфейс:
 *       Добавление точки мышью -- DONE
-*       Добавление точки через интерфейс
+*       Добавление точки через интерфейс -- DONE
 *       Редактирование точки
 *       Удаление точки
 *       Очистка радиусов, кругов и флагов роста
@@ -29,11 +29,11 @@
 *
 *
 *
-* Сделать анимацию разрастания кругов
+* Сделать анимацию разрастания кругов -- DONE
 * Сделать детекцию коллизии -- DONE
 *
 *
-* Реализовать панорамирование <Ну наверн стрелочки>
+* Реализовать панорамирование <Ну наверн стрелочки> -- DONE
 * Зум (Частично реализован) -- DONE <Ctrl + [> <Ctrl + ]>
 *
 * Поворот идёт нахуй до второй лабы
@@ -50,6 +50,7 @@ class Dot {
         this.radius = 0;
         this.type = "relative";
         this.grown = false;
+        this.id = 0;
     }
 
     static distance(a, b) {
@@ -66,6 +67,8 @@ class Dot {
 
 class Engine {
 
+    dotCount = 0;
+
     constructor(canvas, unitSize) {
         this.canvas = canvas;
         this.ctx = this.canvas.getContext(`2d`);
@@ -79,13 +82,20 @@ class Engine {
     addDot(dot) {
         let rel = this.getRelative(dot)
         let relDot = new Dot(rel.x, rel.y);
+        relDot.id = this.dotCount++;
         this.dotArr.push(relDot);
+
+        return relDot;
     }
 
     // Добавить точку по относительным координатам
     putDot(dot){
         let relDot = new Dot(dot.x, dot.y);
+        relDot.id = this.dotCount++;
         this.dotArr.push(relDot);
+        console.log(this.dotArr);
+
+        return relDot;
     }
 
     // Получить относительные координаты из абсолютных
@@ -110,6 +120,7 @@ class Engine {
     }
 
     // Функция, запускающая рост кругов
+    // Добавить маркер конца роста для останова анимации.
     grow() {
         let workArr = this.dotArr;
 
@@ -218,6 +229,10 @@ class Engine {
         this.renderDots();
         this.renderCircles();
     }
+
+    checkGrowth() {
+        return this.dotArr.reduce( (dot, curValue) => curValue.grown && dot, true);
+    }
 }
 
 class App {
@@ -229,10 +244,15 @@ class App {
 // Сюда все слушалки и рисовалки
 class Layer {
     constructor(container) {
+        this.inpX = document.getElementById('add-x');
+        this.inpY = document.getElementById('add-y');
+        this.list = document.querySelector(`.list`);
         this.canvas = document.querySelector(`#canvas`);
-
+        this.addBtn = document.getElementById(`add-btn`);
+        this.resetBtn = document.getElementById(`reset-btn`);
+        this.runBtn = document.getElementById(`run-btn`);
         this.fit(this.canvas);
-        this.engine = new Engine(this.canvas, 30)
+        this.engine = new Engine(this.canvas, 30);
 
         // Штука, которая реагирует на смену размера окна
         addEventListener(`resize`, () => {
@@ -244,7 +264,7 @@ class Layer {
         // Штука, которая рисует точку при нажатии на холст
         this.canvas.addEventListener('mousedown', (event) => {
             let rect = this.canvas.getBoundingClientRect()
-            this.engine.addDot({x: event.clientX - rect.left, y: event.clientY - rect.top, r: this.engine.stdR});
+            this.addToList(this.engine.addDot({x: event.clientX - rect.left, y: event.clientY - rect.top}));
             this.engine.renderAll();
         })
 
@@ -274,15 +294,100 @@ class Layer {
             if (event.code === 'Space') {
                 let timer = setInterval(()=>{
                     this.engine.grow();
+                    this.updateRadius();
                     this.engine.renderAll();
-                    if (end) clearInterval(timer)
+                    if (this.engine.checkGrowth()) clearInterval(timer)
                 }, 1000 / 100)
-                // this.engine.grow();
             }
+        })
+
+        this.addBtn.addEventListener(`click`, () => {
+            console.log(this.inpX.value)
+            this.addToList(this.engine.putDot({x : this.inpX.value, y : this.inpY.value}));
+            this.engine.renderAll();
+        });
+
+        this.resetBtn.addEventListener(`click`, () => {
+            this.engine.dotArr.forEach((dot) => {
+                dot.radius = 0;
+                dot.grown = false;
+            })
+
+            this.engine.renderAll();
+            this.updateRadius();
+        })
+
+        this.runBtn.addEventListener(`click`, () => {
+            let timer = setInterval(() => {
+                this.engine.grow();
+                this.engine.renderAll();
+                this.updateRadius();
+                if (this.engine.checkGrowth()){
+                    clearInterval(timer);
+                };
+            }, 1000 / 100)
         })
 
         // Метод движка, который вызывает отрисовку заранее поставленных точек
         this.engine.renderAll()
+    }
+
+
+    addToList(dot) {
+        let element = document.createElement('div');
+        console.log(this.engine.dotArr)
+        element.id = dot.id;
+        element.className = `dotElement`;
+
+        let idText = document.createElement(`p`);
+        idText.textContent = `id: ` + dot.id;
+        element.append(idText);
+
+        let xLabel = document.createElement(`label`);
+        xLabel.htmlFor = `x-inp`;
+        xLabel.textContent = `X:`
+
+        let xIn = document.createElement(`input`);
+        xIn.className = `x-inp`;
+        xLabel.append(xIn);
+        element.append(xLabel);
+
+        let yLabel = document.createElement(`label`);
+        yLabel.htmlFor = `y-inp`;
+        yLabel.textContent = `Y:`
+
+        let yIn = document.createElement(`input`);
+        yIn.className = `y-inp`;
+        yLabel.append(yIn);
+        element.append(yLabel);
+
+        let rad = document.createElement(`p`);
+        rad.id = `rid-` + dot.id;
+        rad.textContent = `R: ` + dot.radius;
+        element.append(rad);
+
+        let deleteButton = document.createElement('button');
+        deleteButton.id = dot.id;
+        deleteButton.className = `delBtn`;
+        deleteButton.addEventListener(`click`, () => {
+            this.engine.dotArr.forEach((dot, i) => {
+                if (dot.id === parseInt(deleteButton.id)) {
+                    this.engine.dotArr.splice(i, 1);
+                }
+            })
+            this.engine.renderAll();
+            element.remove();
+        })
+        element.append(deleteButton);
+
+        this.list.append(element);
+    }
+
+    updateRadius() {
+        this.engine.dotArr.forEach((dot) => {
+          let text = document.getElementById(`rid-` + dot.id);
+          text.innerHTML = `R: ` + dot.radius;
+        })
     }
 
     // Метод, который изменяет размер канваса

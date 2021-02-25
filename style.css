@@ -20,6 +20,11 @@ body {
     overflow: auto;
 }
 
+.list {
+    height: 70%;
+    overflow: auto;
+}
+
 .canvas__container {
     /* я просто отодвинул одно от другого */
     margin-right: 0;
