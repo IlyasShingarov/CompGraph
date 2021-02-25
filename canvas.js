@@ -308,13 +308,47 @@ class Layer {
         })
 
         document.addEventListener(`keypress`, (event) => {
-            if (event.code === 'Space') {
+            if (event.code === 'Space' && (event.ctrlKey || event.metaKey)) {
+                this.engine.dotArr.forEach((dot) => {
+                    dot.radius = 0;
+                    dot.grown = false;
+                })
+
+                this.updateRadius();
+                this.engine.renderAll();
+
                 let timer = setInterval(()=>{
                     this.engine.grow();
                     this.updateRadius();
                     this.engine.renderAll();
                     if (this.engine.checkGrowth()) clearInterval(timer)
                 }, 1000 / 100)
+            }
+            if (event.code === 'KeyZ' && (event.ctrlKey || event.metaKey)) {
+                switch (this.prevState) {
+                    case 'none':
+                        break;
+                    case 'del':
+                        this.engine.dotArr.push(this.prevDot);
+                        this.addToList(this.prevDot);
+                        this.engine.renderAll();
+                        this.prevState = 'add';
+                        break;
+                    case 'add':
+                        this.engine.dotArr.forEach((dot, i) => {
+                            if (dot.id === parseInt(this.prevDot.id)) {
+                                this.prevDot = dot;
+                                this.prevDot.radius = 0;
+                                this.prevState = 'del';
+                                this.engine.dotArr.splice(i, 1);
+                                document.getElementById(dot.id).remove();
+                            }
+                            this.engine.renderAll();
+                        })
+                        break;
+                    case 'change':
+                        break;
+                }
             }
         })
 
@@ -370,6 +404,14 @@ class Layer {
         })
 
         this.runBtn.addEventListener(`click`, () => {
+            this.engine.dotArr.forEach((dot) => {
+                dot.radius = 0;
+                dot.grown = false;
+            })
+
+            this.updateRadius();
+            this.engine.renderAll();
+
             let timer = setInterval(() => {
                 this.engine.grow();
                 this.engine.renderAll();
@@ -439,6 +481,7 @@ class Layer {
             this.engine.dotArr.forEach((dot, i) => {
                 if (dot.id === parseInt(deleteButton.id)) {
                     this.prevDot = dot;
+                    this.prevDot.radius = 0;
                     this.prevState = 'del';
                     this.engine.dotArr.splice(i, 1);
                 }
