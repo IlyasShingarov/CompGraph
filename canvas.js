@@ -22,8 +22,8 @@
 *       Добавление точки мышью -- DONE
 *       Добавление точки через интерфейс -- DONE
 *       Редактирование точки
-*       Удаление точки -- DONE
-*       Очистка радиусов, кругов и флагов роста -- DONE
+*       Удаление точки
+*       Очистка радиусов, кругов и флагов роста
 *       Отмена последнего действия <Ctrl + Z>
         Проверка на ввод чего-либо
 *
@@ -302,11 +302,7 @@ class Layer {
         })
 
         this.addBtn.addEventListener(`click`, () => {
-
-            if (this.engine.dotArr.reduce( (dot, curValue) => curValue.x === this.inpX && dot, false)) {
-                alert('Точка уже существует')
-            }
-
+            console.log(this.inpX.value)
             this.addToList(this.engine.putDot({x : this.inpX.value, y : this.inpY.value}));
             this.engine.renderAll();
         });
@@ -344,6 +340,7 @@ class Layer {
         element.className = `dotElement`;
 
         let idText = document.createElement(`span`);
+        idText.className = "dot-id";
         idText.textContent = `id: ` + dot.id;
         element.append(idText);
 
@@ -352,12 +349,7 @@ class Layer {
         xLabel.textContent = `X:`
 
         let xIn = document.createElement(`input`);
-        xIn.className = `x-inp`;
-        xIn.value = dot.x.toString();
-        xIn.addEventListener(`change`, () => {
-           dot.x = parseFloat(xIn.value);
-           this.engine.renderAll();
-        });
+        xIn.className = `x-inp inp`;
         xLabel.append(xIn);
         element.append(xLabel);
 
@@ -366,12 +358,7 @@ class Layer {
         yLabel.textContent = `Y:`
 
         let yIn = document.createElement(`input`);
-        yIn.className = `y-inp`;
-        yIn.value = dot.y.toString();
-        yIn.addEventListener(`change`, () => {
-            dot.y = parseFloat(yIn.value);
-            this.engine.renderAll();
-        });
+        yIn.className = `y-inp inp`;
         yLabel.append(yIn);
         element.append(yLabel);
 
@@ -381,8 +368,9 @@ class Layer {
         element.append(rad);
 
         let deleteButton = document.createElement('button');
+        deleteButton.innerHTML = "-"
         deleteButton.id = dot.id;
-        deleteButton.className = `delBtn`;
+        deleteButton.className = `delBtn btn btn-dark btn-sm`;
         deleteButton.addEventListener(`click`, () => {
             this.engine.dotArr.forEach((dot, i) => {
                 if (dot.id === parseInt(deleteButton.id)) {
