@@ -21,11 +21,11 @@
 * Интерфейс:
 *       Добавление точки мышью -- DONE
 *       Добавление точки через интерфейс -- DONE
-*       Редактирование точки
-*       Удаление точки
-*       Очистка радиусов, кругов и флагов роста
+*       Редактирование точки -- DONE
+*       Удаление точки -- DONE
+*       Очистка радиусов, кругов и флагов роста -- DONE
 *       Отмена последнего действия <Ctrl + Z>
-        Проверка на ввод чего-либо
+        Проверка на ввод чего-либо -- DONE
 *
 *
 *
@@ -82,16 +82,23 @@ class Engine {
     addDot(dot) {
         let rel = this.getRelative(dot)
         let relDot = new Dot(rel.x, rel.y);
-        relDot.id = this.dotCount++;
-        this.dotArr.push(relDot);
+        if (this.dotArr.reduce( (dot, curValue) => (curValue.x === rel.x && curValue.y === rel.y) || dot, false)) {
+            alert(`Введена существующая точка`);
+            return false;
+        } else {
+            relDot.id = this.dotCount++;
+            this.dotArr.push(relDot);
+            return relDot;
+        }
 
-        return relDot;
     }
 
     // Добавить точку по относительным координатам
     putDot(dot){
         let relDot = new Dot(dot.x, dot.y);
+
         relDot.id = this.dotCount++;
+
         this.dotArr.push(relDot);
         console.log(this.dotArr);
 
@@ -243,6 +250,7 @@ class App {
 
 // Сюда все слушалки и рисовалки
 class Layer {
+    prevState = 'none'
     constructor(container) {
         this.inpX = document.getElementById('add-x');
         this.inpY = document.getElementById('add-y');
@@ -251,6 +259,7 @@ class Layer {
         this.addBtn = document.getElementById(`add-btn`);
         this.resetBtn = document.getElementById(`reset-btn`);
         this.runBtn = document.getElementById(`run-btn`);
+        this.undoBtn = document.getElementById(`undo-btn`);
         this.fit(this.canvas);
         this.engine = new Engine(this.canvas, 30);
 
@@ -264,7 +273,10 @@ class Layer {
         // Штука, которая рисует точку при нажатии на холст
         this.canvas.addEventListener('mousedown', (event) => {
             let rect = this.canvas.getBoundingClientRect()
-            this.addToList(this.engine.addDot({x: event.clientX - rect.left, y: event.clientY - rect.top}));
+            let dot = this.engine.addDot({x: event.clientX - rect.left, y: event.clientY - rect.top})
+            if (dot) {
+                this.addToList(dot);
+            }
             this.engine.renderAll();
         })
 
@@ -301,10 +313,45 @@ class Layer {
             }
         })
 
+        this.undoBtn.addEventListener(`click`, () => {
+            switch (this.prevState) {
+                case 'none':
+                    break;
+                case 'del':
+                    this.engine.dotArr.push(this.prevDot);
+                    this.addToList(this.prevDot);
+                    this.engine.renderAll();
+                    this.prevState = 'add';
+                    break;
+                case 'add':
+                    this.engine.dotArr.forEach((dot, i) => {
+                        if (dot.id === parseInt(this.prevDot.id)) {
+                            this.prevDot = dot;
+                            this.prevState = 'del';
+                            this.engine.dotArr.splice(i, 1);
+                            this.engine.renderAll();
+                            document.getElementById(dot.id).remove();
+                        }
+                    })
+                    break;
+                case 'change':
+                    break;
+            }
+        })
+
         this.addBtn.addEventListener(`click`, () => {
-            console.log(this.inpX.value)
-            this.addToList(this.engine.putDot({x : this.inpX.value, y : this.inpY.value}));
-            this.engine.renderAll();
+            let nx = parseFloat(this.inpX.value);
+            let ny = parseFloat(this.inpY.value);
+            if (!this.inpX.value || !this.inpY.value){
+                alert(`Попытка ввести пустые поля`)
+            } else {
+                if (this.engine.dotArr.reduce( (dot, curValue) => (curValue.x === nx && curValue.y === ny) || dot, false)) {
+                    alert(`Введена существующая точка`);
+                } else {
+                    this.addToList(this.engine.putDot({x : nx, y : ny}));
+                    this.engine.renderAll();
+                }
+            }
         });
 
         this.resetBtn.addEventListener(`click`, () => {
@@ -329,7 +376,7 @@ class Layer {
         })
 
         // Метод движка, который вызывает отрисовку заранее поставленных точек
-        this.engine.renderAll()
+        this.engine.renderAll();
     }
 
 
@@ -350,15 +397,27 @@ class Layer {
 
         let xIn = document.createElement(`input`);
         xIn.className = `x-inp inp`;
+        xIn.type = 'number';
+        xIn.value = dot.x.toString();
+        xIn.addEventListener(`change`, () => {
+            dot.x = parseFloat(xIn.value);
+            this.engine.renderAll();
+        });
         xLabel.append(xIn);
         element.append(xLabel);
 
         let yLabel = document.createElement(`label`);
         yLabel.htmlFor = `y-inp`;
-        yLabel.textContent = `Y:`
+        yLabel.textContent = `Y:`;
 
         let yIn = document.createElement(`input`);
+        yIn.type = `number`;
         yIn.className = `y-inp inp`;
+        yIn.value = dot.y.toString();
+        yIn.addEventListener(`change`, () => {
+            dot.y = parseFloat(yIn.value);
+            this.engine.renderAll();
+        });
         yLabel.append(yIn);
         element.append(yLabel);
 
@@ -374,6 +433,8 @@ class Layer {
         deleteButton.addEventListener(`click`, () => {
             this.engine.dotArr.forEach((dot, i) => {
                 if (dot.id === parseInt(deleteButton.id)) {
+                    this.prevDot = dot;
+                    this.prevState = 'del';
                     this.engine.dotArr.splice(i, 1);
                 }
             })
