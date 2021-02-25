@@ -24,7 +24,7 @@
 *       Редактирование точки -- DONE
 *       Удаление точки -- DONE
 *       Очистка радиусов, кругов и флагов роста -- DONE
-*       Отмена последнего действия <Ctrl + Z>
+*       Отмена последнего действия <Ctrl + Z> -- DONE
         Проверка на ввод чего-либо -- DONE
 *
 *
@@ -418,7 +418,7 @@ class Layer {
                 this.updateRadius();
                 if (this.engine.checkGrowth()){
                     clearInterval(timer);
-                };
+                }
             }, 1000 / 100)
         })
 
