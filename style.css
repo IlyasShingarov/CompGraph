@@ -1,0 +1,90 @@
+body {
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+}
+.contaner {
+    display: flex;
+    justify-content: space-evenly;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+
+}
+/* у тебя может быть переполненние твоего интерефейса, но это смотря что ты делать юудешь и как, если появится горизонтальнаяполоса прокрутки то пиши чо */
+.interface {
+    width: 30%;
+    margin: 0;
+    padding: 15px;
+    background: aliceblue;
+    overflow: auto;
+}
+
+.list {
+    height: 85%;
+    overflow: auto;
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: #aeaeae 5px 5px 5px;
+    margin-bottom: 30px;
+}
+
+.canvas__container {
+    /* я просто отодвинул одно от другого */
+    margin-right: 0;
+    width: 70%;
+    border: 2px solid black;
+    background: rgba(0, 0, 0, 0);
+}
+
+.inp {
+    max-width: 55px;
+}
+
+.inp-big {
+    max-width: 120px;
+}
+
+
+/* .btn {
+    display: inline-block;
+    font-weight: normal;
+    line-height: 1.25;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    border: 1px solid transparent;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border-radius: 0.25rem;
+    color: #fff;
+    background-color: #0275d8;
+    border-color: #0275d8;
+} */
+
+.dotElement, .add-form, .btn-menu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 5px;
+}
+
+.dot-id {
+    min-width: 39px;
+}
+
+.add-form {
+    margin-bottom: 25px;
+}
+
+
+#canvas {
+
+}

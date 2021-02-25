@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          >
+
+    <!-- <link rel="stylesheet" href="./normalize.css"> -->
+    <link rel="stylesheet" href="./style.css">
+    <title>Canvas</title>
+</head>
+<body>
+
+
+
+
+    <div class="contaner">
+        <div class="canvas__container">
+            <canvas id="canvas"></canvas>
+        </div>
+        <div class="interface">
+            <div class="list">
+                Список
+            </div>
+            <div class="add-form">
+                <label for="add-x">X:</label><input class="inp-big" type="number" id="add-x">
+            </br>
+                <label for="add-y">Y:</label><input class="inp-big" type="number" id="add-y">
+                <button class="btn btn-info btn-sm" id="add-btn">+</button>
+            </div>
+            <div class="btn-menu">
+                 <button class="btn btn-primary btn" id="run-btn">Вычислить радиусы</button>
+                <button class="btn btn-danger btn" id="reset-btn">Сброс</button>
+                <button class="btn btn" id="meh">Отмена</button>
+            </div>
+           
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+    <!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
+            crossorigin="anonymous"></script>
+    <script src="canvas.js"></script>
+</body>
+</html>
