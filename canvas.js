@@ -191,7 +191,7 @@ class Engine {
             this.ctx.moveTo(0, this.center.y - i);
             this.ctx.lineTo(this.canvas.width, this.center.y - i);
         }
-        this.ctx.strokeStyle = "grey";
+        this.ctx.strokeStyle = "lightgrey";
         this.ctx.stroke();
     }
 
@@ -212,6 +212,11 @@ class Engine {
             this.ctx.beginPath();
             this.ctx.arc(realDot.x, realDot.y, this.stdR, 0, 2 * Math.PI, true);
             this.ctx.fill();
+            // let w = this.ctx.measureText(dot.id).width;
+            // this.ctx.fillRect(dot.x + 3, dot.y + 3, w+3, 20);
+            this.ctx.font = '18px sans-serif';
+            this.ctx.fillText(dot.id, realDot.x + 4, realDot.y - 4);
+            this.ctx.fillStyle = '#000';
         });
     }
 
@@ -398,7 +403,7 @@ class Layer {
         let xIn = document.createElement(`input`);
         xIn.className = `x-inp inp`;
         xIn.type = 'number';
-        xIn.value = dot.x.toString();
+        xIn.value = dot.x + "";
         xIn.addEventListener(`change`, () => {
             dot.x = parseFloat(xIn.value);
             this.engine.renderAll();
@@ -413,7 +418,7 @@ class Layer {
         let yIn = document.createElement(`input`);
         yIn.type = `number`;
         yIn.className = `y-inp inp`;
-        yIn.value = dot.y.toString();
+        yIn.value = dot.y + "";
         yIn.addEventListener(`change`, () => {
             dot.y = parseFloat(yIn.value);
             this.engine.renderAll();
