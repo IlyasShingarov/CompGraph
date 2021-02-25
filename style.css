@@ -3,7 +3,7 @@ body {
     width: 100vw;
     margin: 0;
 }
-.container {
+.contaner {
     display: flex;
     justify-content: space-evenly;
     height: 100%;

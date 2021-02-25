@@ -22,8 +22,8 @@
 *       Добавление точки мышью -- DONE
 *       Добавление точки через интерфейс -- DONE
 *       Редактирование точки
-*       Удаление точки
-*       Очистка радиусов, кругов и флагов роста
+*       Удаление точки -- DONE
+*       Очистка радиусов, кругов и флагов роста -- DONE
 *       Отмена последнего действия <Ctrl + Z>
         Проверка на ввод чего-либо
 *
@@ -302,7 +302,11 @@ class Layer {
         })
 
         this.addBtn.addEventListener(`click`, () => {
-            console.log(this.inpX.value)
+
+            if (this.engine.dotArr.reduce( (dot, curValue) => curValue.x === this.inpX && dot, false)) {
+                alert('Точка уже существует')
+            }
+
             this.addToList(this.engine.putDot({x : this.inpX.value, y : this.inpY.value}));
             this.engine.renderAll();
         });
@@ -339,7 +343,7 @@ class Layer {
         element.id = dot.id;
         element.className = `dotElement`;
 
-        let idText = document.createElement(`p`);
+        let idText = document.createElement(`span`);
         idText.textContent = `id: ` + dot.id;
         element.append(idText);
 
@@ -349,6 +353,11 @@ class Layer {
 
         let xIn = document.createElement(`input`);
         xIn.className = `x-inp`;
+        xIn.value = dot.x.toString();
+        xIn.addEventListener(`change`, () => {
+           dot.x = parseFloat(xIn.value);
+           this.engine.renderAll();
+        });
         xLabel.append(xIn);
         element.append(xLabel);
 
@@ -358,12 +367,17 @@ class Layer {
 
         let yIn = document.createElement(`input`);
         yIn.className = `y-inp`;
+        yIn.value = dot.y.toString();
+        yIn.addEventListener(`change`, () => {
+            dot.y = parseFloat(yIn.value);
+            this.engine.renderAll();
+        });
         yLabel.append(yIn);
         element.append(yLabel);
 
-        let rad = document.createElement(`p`);
+        let rad = document.createElement(`span`);
         rad.id = `rid-` + dot.id;
-        rad.textContent = `R: ` + dot.radius;
+        rad.textContent = `R: ` + dot.radius.toFixed(3);
         element.append(rad);
 
         let deleteButton = document.createElement('button');
@@ -386,7 +400,7 @@ class Layer {
     updateRadius() {
         this.engine.dotArr.forEach((dot) => {
           let text = document.getElementById(`rid-` + dot.id);
-          text.innerHTML = `R: ` + dot.radius;
+          text.innerHTML = `R: ` + dot.radius.toFixed(3);
         })
     }
 
